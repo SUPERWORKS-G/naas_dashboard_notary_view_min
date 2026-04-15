@@ -233,17 +233,17 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .vb-list-scroll{max-height:195px;overflow-y:auto;background:var(--white);scrollbar-width:none;-ms-overflow-style:none;}
 .vb-list-scroll::-webkit-scrollbar{display:none;}
 .vb-spacer{height:24px;}
-.vb-detail{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);min-height:520px;display:flex;flex-direction:column;background:var(--white);}
-.vb-empty{flex:1;min-height:520px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--grey2);font-size:13px;font-weight:300;padding:48px;}
+.vb-detail{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);height:560px;display:flex;flex-direction:column;background:var(--white);}
+.vb-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--grey2);font-size:13px;font-weight:300;padding:48px;}
 .vb-empty-glyph{font-size:40px;font-weight:200;color:var(--rule);}
-.vb-open{display:none;flex-direction:column;}
+.vb-open{display:none;flex-direction:column;flex:1;min-height:0;}
 .vb-open.show{display:flex;}
-.vb-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;}
+.vb-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;flex-shrink:0;}
 .vb-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
 .vb-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
 .vb-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.vb-db{display:grid;grid-template-columns:1fr 280px;}
-.vb-db-col{padding:20px 24px;overflow-y:auto;max-height:480px;scrollbar-width:none;-ms-overflow-style:none;}
+.vb-db{display:grid;grid-template-columns:1fr 280px;flex:1;min-height:0;overflow:hidden;}
+.vb-db-col{padding:20px 24px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
 .vb-db-col::-webkit-scrollbar{display:none;}
 .vb-db-col:first-child{border-right:1px solid var(--rule);}
 
@@ -344,9 +344,9 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .case-card:last-child{border-bottom:none;}
 .case-card:hover{background:var(--surface);}
 .case-card.active{background:var(--surface);border-left:3px solid var(--red);}
-.cc-top{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;}
-.cc-num{font-size:10px;font-weight:300;color:var(--grey2);flex-shrink:0;}
-.cc-act{font-size:13px;font-weight:400;color:var(--ink);line-height:1.3;flex:1;}
+.cc-top{display:flex;flex-direction:column;gap:2px;margin-bottom:3px;}
+.cc-num{font-size:10px;font-weight:300;color:var(--grey2);}
+.cc-act{font-size:13px;font-weight:400;color:var(--ink);line-height:1.3;}
 .cc-client{font-size:12px;font-weight:300;color:var(--grey);margin-bottom:5px;}
 .cc-ref{font-size:10px;font-weight:300;color:var(--grey2);margin-bottom:6px;letter-spacing:0.3px;}
 .cc-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -435,9 +435,8 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 <hr class="rule-hr">
 
 <!-- ══ VOLUME EXPLORER ══ -->
-<div class="section-label">Volum dosare — explorator</div>
+<div class="section-label">Dosare</div>
 <div class="vol-tabs-row">
-  <span class="vol-tabs-label">Tip act</span>
   <div class="vol-tabs">
     <button class="vol-tab active" onclick="setFilter('toate',this)">Toate</button>
     <button class="vol-tab" onclick="setFilter('procuri',this)">Procuri</button>
@@ -483,26 +482,22 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
   <div class="section-label" style="margin-bottom:0">Dosare active</div>
   <div style="display:flex;align-items:center;gap:20px;">
     <div class="sort-bar" style="margin-bottom:0;">
-      <span class="sort-label">Sortare</span>
       <button class="sort-btn active" id="sb-pref" onclick="setSort('pref',this)">Data preferată</button>
       <button class="sort-btn" id="sb-status" onclick="setSort('status',this)">Status</button>
       <button class="sort-btn" id="sb-creat" onclick="setSort('creat',this)">Creat la</button>
       <button class="sort-btn" id="sb-nume" onclick="setSort('nume',this)">Nume</button>
     </div>
     <div style="width:1px;height:20px;background:var(--rule);"></div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--grey2);">Vizualizare</span>
-      <div class="view-switcher">
-        <button class="view-btn active" id="vbtn-a" onclick="switchView('a')">
-          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="4.8" height="8.8"/><rect x="7.6" y="0.6" width="4.8" height="8.8"/></svg>Paralel
-        </button>
-        <button class="view-btn" id="vbtn-b" onclick="switchView('b')">
-          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="3.5"/><rect x="0.6" y="5.9" width="11.8" height="3.5"/></svg>Sus-jos
-        </button>
-        <button class="view-btn" id="vbtn-c" onclick="switchView('c')">
-          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="8.8"/><line x1="8" y1="0.6" x2="8" y2="9.4"/></svg>Panou
-        </button>
-      </div>
+    <div class="view-switcher">
+      <button class="view-btn active" id="vbtn-a" onclick="switchView('a')">
+        <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="4.8" height="8.8"/><rect x="7.6" y="0.6" width="4.8" height="8.8"/></svg>Paralel
+      </button>
+      <button class="view-btn" id="vbtn-b" onclick="switchView('b')">
+        <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="3.5"/><rect x="0.6" y="5.9" width="11.8" height="3.5"/></svg>Sus-jos
+      </button>
+      <button class="view-btn" id="vbtn-c" onclick="switchView('c')">
+        <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="8.8"/><line x1="8" y1="0.6" x2="8" y2="9.4"/></svg>Panou
+      </button>
     </div>
   </div>
 </div>
@@ -1098,10 +1093,11 @@ setTimeout(showNewCaseNotif,10000);
 // ══ CHART ══
 // 6 historical months only — no projection axis
 const MONTHS_H=['Nov','Dec','Ian','Feb','Mar','Apr'],ACT_V=[16,13,18,17,20,20],ACT_F=[13,11,15,14,17,17];
+const AVG_V=ACT_V.reduce((a,b)=>a+b,0)/ACT_V.length;
 let volChart,sv=20,sw=4,sr=85;
 function buildLineData(){
   const eff=Math.max(0.6,1-(sw-1)*0.04)*(sr/100);
-  return ACT_V.map(v=>Math.round(v*eff));
+  return ACT_V.map(v=>Math.round(v*(sv/AVG_V)*eff));
 }
 
 window.addEventListener('load',()=>{
