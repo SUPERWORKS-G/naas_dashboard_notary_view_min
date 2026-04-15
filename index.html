@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>notariat.co — Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:#0d0d0d; --white:#ffffff; --red:#d42b2b; --red-lt:#fdeaea;
+  --grey:#555; --grey2:#aaa; --rule:#d8d6cf; --bg:#ffffff; --surface:#f5f5f3;
+  --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.6;}
+.page{max-width:1160px;margin:0 auto;padding:0 44px 96px;background:#fff;}
+
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes cardIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fieldIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+@keyframes flash{0%{background:var(--surface)}100%{background:transparent}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.7)}}
+
+.anim-card{animation:cardIn 0.3s ease both;}
+.anim-card:nth-child(1){animation-delay:0.04s}
+.anim-card:nth-child(2){animation-delay:0.08s}
+.anim-card:nth-child(3){animation-delay:0.12s}
+.anim-card:nth-child(4){animation-delay:0.16s}
+.detail-fade{animation:fadeIn 0.2s ease both;}
+.field-stacked{animation:fieldIn 0.18s ease both;}
+.view-container{display:none;animation:fadeIn 0.15s ease both;}
+.view-container.active{display:block;}
+
+/* ══ HEADER ══ */
+.header-strip{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:18px 0;border-bottom:1px solid var(--ink);}
+.hs-left{display:flex;align-items:baseline;gap:10px;}
+.brand{font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:-0.3px;}
+.brand-pipe{color:var(--rule);font-weight:300;margin:0 4px;}
+.hs-center{font-size:10px;font-weight:300;color:var(--grey);letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.hs-right{font-size:10px;font-weight:300;color:var(--grey);text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:18px;letter-spacing:0.5px;}
+.logout-btn{font-family:var(--sans);font-size:10px;font-weight:300;color:var(--grey2);background:none;border:none;cursor:pointer;transition:color 0.15s;padding:0;letter-spacing:0.5px;}
+.logout-btn:hover{color:var(--ink);}
+
+/* ══ HERO ══ */
+.hero{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);margin-bottom:56px;background:var(--white);}
+.hero-left{padding:52px 52px 52px 0;border-right:1px solid var(--rule);}
+.hero-eyebrow{font-size:10px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:var(--grey);margin-bottom:20px;}
+.hero-greeting{font-family:var(--sans);font-size:68px;font-weight:300;line-height:0.95;letter-spacing:-2px;color:var(--ink);}
+.hero-name{font-family:var(--sans);font-size:68px;font-weight:700;line-height:0.95;letter-spacing:-2px;color:var(--red);}
+.hero-right{padding:52px 0 52px 52px;display:flex;flex-direction:column;justify-content:space-between;background:var(--white);}
+.office-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:10px;}
+.office-name{font-family:var(--sans);font-size:22px;font-weight:600;color:var(--ink);margin-bottom:6px;line-height:1.15;letter-spacing:-0.3px;}
+.office-meta{font-size:13px;font-weight:300;color:var(--grey);line-height:1.6;}
+
+/* Today block */
+.today-block{margin-top:28px;padding-top:20px;border-top:1px solid var(--rule);}
+.today-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:12px;}
+.today-scroll-wrap{position:relative;}
+.today-scroll-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;background:linear-gradient(to bottom,rgba(255,255,255,0),var(--white));pointer-events:none;opacity:0;transition:opacity 0.2s;}
+.today-scroll-wrap.has-more::after{opacity:1;}
+.today-scroll{max-height:112px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.today-scroll::-webkit-scrollbar{display:none;}
+.today-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule);}
+.today-row:last-child{border-bottom:none;}
+.today-time{font-size:11px;font-weight:300;color:var(--grey);flex-shrink:0;min-width:44px;letter-spacing:0.5px;}
+.today-act{font-size:13px;font-weight:400;color:var(--ink);padding:0 12px;flex:1;}
+.today-name{font-size:12px;font-weight:300;color:var(--grey);}
+.today-empty{font-size:13px;font-weight:300;color:var(--grey2);padding:12px 0;font-style:italic;}
+
+/* ══ METRIC CARDS — vertical dividers only ══ */
+.cards{display:grid;margin-bottom:56px;background:var(--white);}
+.cards-4{grid-template-columns:repeat(4,1fr);}
+.card{background:var(--white);padding:28px 28px 24px;border-right:1px solid var(--rule);transition:background 0.15s;}
+.card:last-child{border-right:none;}
+.card:hover{background:var(--surface);}
+.card-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:14px;}
+.card-value{font-family:var(--sans);font-size:52px;font-weight:700;line-height:1;color:var(--ink);margin-bottom:6px;letter-spacing:-2px;transition:all 0.25s;}
+.card-value.accent{color:var(--red);}
+.card-sub{font-size:13px;font-weight:300;color:var(--grey);line-height:1.4;}
+.card-filter-tag{display:inline-block;font-size:10px;font-weight:300;letter-spacing:1px;text-transform:uppercase;color:var(--grey2);margin-top:6px;}
+.card-filter-tag.is-active{color:var(--red);}
+
+/* ══ RULE + LABELS ══ */
+.rule-hr{border:none;border-top:1px solid var(--rule);margin:56px 0;}
+.section-label{font-size:10px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:var(--grey2);margin-bottom:20px;}
+
+/* ══ VOLUME EXPLORER ══ */
+.vol-tabs-row{display:flex;align-items:center;gap:24px;margin-bottom:20px;}
+.vol-tabs-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);white-space:nowrap;}
+.vol-tabs{display:flex;gap:24px;}
+.vol-tab{padding:0 0 6px;font-size:11px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;background:none;color:var(--grey2);border:none;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;}
+.vol-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500;}
+.vol-tab:hover:not(.active){color:var(--grey);}
+.vol-desc{border-left:2px solid var(--ink);padding:10px 20px;margin-bottom:28px;display:flex;gap:32px;align-items:baseline;background:none;}
+.vd-name{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--ink);min-width:130px;}
+.vd-body{font-size:13px;font-weight:300;color:var(--grey);line-height:1.5;flex:1;}
+.vd-body strong{color:var(--ink);font-weight:500;}
+
+/* Sliders */
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:20px 52px;margin-bottom:36px;padding:28px 0;border-top:1px solid var(--rule);}
+.ctrl-group{display:flex;flex-direction:column;gap:10px;}
+.ctrl-header{display:flex;justify-content:space-between;align-items:baseline;}
+.ctrl-label{font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey);}
+.ctrl-val{font-size:16px;font-weight:500;color:var(--ink);}
+.ctrl-group input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:1px;background:var(--rule);outline:none;cursor:pointer;}
+.ctrl-group input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ink);cursor:pointer;border:2px solid var(--white);box-shadow:0 0 0 1px var(--ink);}
+.ctrl-group input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid var(--white);box-shadow:0 0 0 1px var(--ink);cursor:pointer;}
+.ctrl-hint{font-size:12px;font-weight:300;color:var(--grey2);line-height:1.5;}
+
+/* Chart */
+.chart-legend{display:flex;gap:24px;margin-bottom:16px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:300;letter-spacing:0.5px;color:var(--grey);}
+.leg-bar{width:12px;height:2px;border-radius:0;flex-shrink:0;}
+.leg-line{width:22px;height:2px;flex-shrink:0;background:var(--ink);}
+.leg-line.dashed{background:none;border-top:2px dashed var(--red);}
+.chart-wrap{position:relative;width:100%;height:240px;}
+.chart-note{font-size:13px;font-weight:300;color:var(--grey);margin-top:12px;line-height:1.6;}
+.chart-note strong{font-weight:500;color:var(--ink);}
+
+/* ══ SORT CONTROLS ══ */
+.sort-bar{display:flex;align-items:center;gap:20px;margin-bottom:0;}
+.sort-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);}
+.sort-btn{font-size:11px;font-weight:300;letter-spacing:0.3px;padding:0 0 3px;background:none;color:var(--grey2);border:none;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;}
+.sort-btn.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500;}
+.sort-btn:hover:not(.active){color:var(--grey);}
+
+/* ══ VIEW SWITCHER ══ */
+.view-switcher-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rule);}
+.view-switcher{display:flex;gap:20px;}
+.view-btn{padding:0 0 4px;font-size:11px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;background:none;color:var(--grey2);border:none;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:7px;}
+.view-btn.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500;}
+.view-btn:hover:not(.active){color:var(--grey);}
+.view-btn svg{width:13px;height:13px;flex-shrink:0;}
+
+/* ══ SHARED LIST COLUMNS ══ */
+.list-hdr-shared{display:grid;grid-template-columns:36px 2fr 1.4fr 140px 100px;padding:9px 20px;background:var(--surface);border-bottom:1px solid var(--rule);}
+.list-hdr-shared span{font-size:9px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey2);}
+.list-row-shared{display:grid;grid-template-columns:36px 2fr 1.4fr 140px 100px;padding:13px 20px;border-bottom:none;cursor:pointer;transition:background 0.15s;align-items:center;border-left:3px solid transparent;}
+.list-row-shared:hover{background:var(--surface);}
+.list-row-shared.active{background:var(--surface);border-left:3px solid var(--red);}
+.list-row-shared.filtered-out{display:none;}
+
+/* Shared cell types */
+.l-num{font-size:11px;font-weight:300;color:var(--grey2);}
+.l-act{font-size:14px;font-weight:400;color:var(--ink);line-height:1.3;}
+.l-ref{font-size:11px;font-weight:300;color:var(--grey);letter-spacing:0.3px;}
+.l-flag{font-size:11px;font-weight:400;color:var(--red);}
+.l-client{font-size:14px;font-weight:300;color:var(--ink);}
+.l-date{font-size:12px;font-weight:300;color:var(--grey);text-align:left;line-height:1.4;}
+.l-date-main{display:block;color:var(--ink);font-weight:400;}
+.l-date-slot{display:block;font-size:11px;color:var(--grey);}
+.l-status{font-size:11px;font-weight:300;color:var(--grey);text-align:left;}
+
+/* ══ STATUS DOTS (replaces pill tags) ══ */
+.status-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.status-nou{color:var(--red);}
+.status-nou .status-dot{background:var(--red);}
+.status-lucru{color:var(--grey);}
+.status-lucru .status-dot{background:var(--grey);}
+.status-programat{color:var(--grey2);}
+.status-programat .status-dot{background:var(--grey2);}
+/* tag-ci for discrepancy marker */
+.tag-ci{font-size:9px;font-weight:300;letter-spacing:1px;text-transform:uppercase;color:var(--red);}
+
+/* ══ SHARED FIELD COMPONENTS ══ */
+.field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+.field-stacked{padding:10px 4px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.15s;}
+.field-stacked:hover{background:var(--surface);}
+.field-stacked:active{animation:flash 0.28s ease;}
+.fs-lbl{font-size:10px;font-weight:300;text-transform:uppercase;color:var(--grey2);letter-spacing:1.5px;margin-bottom:3px;display:block;}
+.fs-val{font-size:14px;font-weight:400;color:var(--ink);display:block;line-height:1.3;}
+.fs-val.mono{font-size:13px;font-weight:300;letter-spacing:0.5px;}
+.sub-lbl{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--rule);}
+.ci-link{display:inline-block;font-size:11px;font-weight:300;letter-spacing:0.5px;color:var(--red);text-decoration:none;cursor:pointer;margin-top:14px;transition:opacity 0.15s;text-transform:uppercase;letter-spacing:1px;}
+.ci-link:hover{opacity:0.6;}
+.disc-block{margin-top:16px;border-left:2px solid var(--red);padding-left:14px;}
+.disc-hdr{display:flex;justify-content:space-between;margin-bottom:8px;}
+.disc-hdr-label{font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);}
+.disc-hdr-count{font-size:10px;font-weight:300;color:var(--red);opacity:0.6;}
+.disc-row{display:grid;grid-template-columns:80px 1fr auto;padding:7px 0;border-bottom:1px solid var(--rule);align-items:center;gap:8px;transition:opacity 0.35s;}
+.disc-row:last-child{border-bottom:none;}
+.disc-row.accepted{opacity:0.3;}
+.disc-field{font-size:10px;font-weight:300;color:var(--grey);text-transform:uppercase;letter-spacing:1px;}
+.disc-old{font-size:12px;font-weight:300;color:var(--grey2);text-decoration:line-through;}
+.disc-new{font-size:12px;font-weight:400;color:var(--ink);}
+.disc-accept{font-size:10px;font-weight:400;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;background:none;border:none;padding:0;transition:opacity 0.15s;letter-spacing:0.3px;}
+.disc-accept:hover{opacity:0.4;}
+
+/* Scheduling */
+.pref-box{font-size:13px;font-weight:300;color:var(--grey);padding:10px 0;border-bottom:1px solid var(--rule);margin-bottom:18px;line-height:1.6;}
+.pref-box strong{font-weight:500;color:var(--ink);}
+.inp-lbl{font-size:10px;font-weight:300;text-transform:uppercase;letter-spacing:1.5px;color:var(--grey2);margin-bottom:4px;display:block;}
+.inp-field{font-family:var(--sans);font-size:14px;font-weight:300;color:var(--ink);border:none;border-bottom:1px solid var(--rule);background:transparent;padding:6px 0;outline:none;width:100%;transition:border-color 0.2s;margin-bottom:18px;}
+.inp-field:focus{border-bottom-color:var(--ink);}
+.inp-field::placeholder{color:var(--grey2);}
+.notes-field{font-family:var(--sans);font-size:13px;font-weight:300;color:var(--ink);border:none;border-bottom:1px solid var(--rule);background:transparent;padding:3px 0 8px;outline:none;width:100%;resize:none;height:56px;line-height:1.5;}
+.notes-field::placeholder{color:var(--grey2);}
+.hist-item{font-size:12px;font-weight:300;color:var(--grey);padding:5px 0;border-bottom:1px solid var(--rule);line-height:1.5;}
+.hist-item:last-child{border-bottom:none;}
+
+/* Confirm button */
+.btn-confirm{display:block;width:100%;background:var(--ink);color:var(--white);font-family:var(--sans);font-size:13px;font-weight:400;letter-spacing:1px;text-transform:uppercase;text-align:center;padding:14px 24px;border:none;cursor:pointer;transition:background 0.15s,transform 0.1s;margin-top:24px;}
+.btn-confirm:hover{background:#222;}
+.btn-confirm:active{transform:scale(0.98);}
+
+/* Close button */
+.close-btn{width:28px;height:28px;border-radius:50%;background:none;border:1px solid var(--rule);cursor:pointer;color:var(--grey);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
+.close-btn:hover{border-color:var(--ink);color:var(--ink);transform:rotate(90deg);}
+
+/* ══ VIEW A — SIDE BY SIDE ══ */
+.va-wrap{display:grid;grid-template-columns:268px 1fr;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);height:680px;background:var(--white);}
+.va-list{border-right:1px solid var(--rule);display:flex;flex-direction:column;overflow:hidden;}
+.va-list-scroll{overflow-y:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none;}
+.va-list-scroll::-webkit-scrollbar{display:none;}
+.va-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--grey2);font-size:12px;font-weight:300;padding:48px;}
+.va-empty-glyph{font-size:40px;font-weight:200;color:var(--rule);}
+.va-detail{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.va-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;flex-shrink:0;}
+.va-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
+.va-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
+.va-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.va-db{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;}
+.va-db-col{padding:20px 24px;overflow-y:auto;max-height:100%;scrollbar-width:none;-ms-overflow-style:none;}
+.va-db-col::-webkit-scrollbar{display:none;}
+.va-db-col:first-child{border-right:1px solid var(--rule);}
+
+/* ══ VIEW B — SUS-JOS ══ */
+.vb-list-wrap{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--white);}
+.vb-list-scroll{max-height:195px;overflow-y:auto;background:var(--white);scrollbar-width:none;-ms-overflow-style:none;}
+.vb-list-scroll::-webkit-scrollbar{display:none;}
+.vb-spacer{height:24px;}
+.vb-detail{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);min-height:520px;display:flex;flex-direction:column;background:var(--white);}
+.vb-empty{flex:1;min-height:520px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--grey2);font-size:13px;font-weight:300;padding:48px;}
+.vb-empty-glyph{font-size:40px;font-weight:200;color:var(--rule);}
+.vb-open{display:none;flex-direction:column;}
+.vb-open.show{display:flex;}
+.vb-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;}
+.vb-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
+.vb-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
+.vb-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb-db{display:grid;grid-template-columns:1fr 280px;}
+.vb-db-col{padding:20px 24px;overflow-y:auto;max-height:480px;scrollbar-width:none;-ms-overflow-style:none;}
+.vb-db-col::-webkit-scrollbar{display:none;}
+.vb-db-col:first-child{border-right:1px solid var(--rule);}
+
+/* ══ VIEW C — DRAWER ══ */
+.vc-list-wrap{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--white);}
+.vc-list-scroll{max-height:240px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.vc-list-scroll::-webkit-scrollbar{display:none;}
+.vc-overlay{position:fixed;inset:0;background:rgba(13,13,13,0.2);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
+.vc-overlay.show{opacity:1;pointer-events:all;}
+.vc-drawer{position:fixed;top:0;right:0;bottom:0;width:70%;min-width:680px;background:var(--white);transform:translateX(100%);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);z-index:101;display:flex;flex-direction:column;}
+.vc-drawer.show{transform:translateX(0);}
+.vc-topbar{border-bottom:1px solid var(--rule);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.vc-topbar-nav{display:flex;align-items:center;gap:14px;}
+.vc-nav-btn{font-size:10px;font-weight:300;letter-spacing:1px;color:var(--grey);background:none;border:none;padding:0 0 3px;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;}
+.vc-nav-btn:hover{color:var(--ink);border-bottom-color:var(--ink);}
+.vc-pos{font-size:10px;font-weight:300;color:var(--grey2);}
+.vc-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;}
+.vc-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
+.vc-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
+.vc-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vc-body{flex:1;overflow-y:auto;display:grid;grid-template-columns:1fr 280px;align-content:start;scrollbar-width:none;-ms-overflow-style:none;}
+.vc-body::-webkit-scrollbar{display:none;}
+.vc-col{padding:20px 24px;}
+.vc-col:first-child{border-right:1px solid var(--rule);}
+
+/* ══ NOTES DOT ══ */
+.notes-wrap{position:relative;}
+.notes-dirty-dot{position:absolute;top:0;right:0;width:6px;height:6px;border-radius:50%;background:var(--red);opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.notes-dirty-dot.show{opacity:1;}
+
+/* ══ CI MODAL ══ */
+.ci-modal-overlay{position:fixed;inset:0;background:rgba(13,13,13,0.4);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:200;}
+.ci-modal-overlay.show{opacity:1;pointer-events:all;}
+.ci-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);width:min(900px,92vw);max-height:88vh;background:var(--white);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:201;overflow:hidden;}
+.ci-modal.show{opacity:1;pointer-events:all;transform:translate(-50%,-50%);}
+.ci-modal-hdr{padding:16px 28px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.ci-modal-title{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--ink);}
+.ci-modal-actions{display:flex;gap:14px;align-items:center;}
+.ci-download-btn{font-size:10px;font-weight:300;letter-spacing:1px;color:var(--grey);text-transform:uppercase;background:none;border:none;border-bottom:1px solid var(--rule);padding:0 0 2px;cursor:pointer;transition:all 0.15s;}
+.ci-download-btn:hover{color:var(--ink);border-bottom-color:var(--ink);}
+.ci-modal-body{display:grid;grid-template-columns:1fr 320px;overflow:hidden;flex:1;}
+.ci-img-pane{background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:400px;}
+.ci-img-placeholder{color:#555;font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;text-align:center;line-height:2.2;}
+.ci-fields-pane{border-left:1px solid var(--rule);overflow-y:auto;padding:24px 28px;scrollbar-width:none;}
+.ci-fields-pane::-webkit-scrollbar{display:none;}
+.ci-fields-title{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:18px;padding-bottom:8px;border-bottom:1px solid var(--rule);}
+
+/* ══ NOTIFICATION BAR ══ */
+.notif-bar{display:none;align-items:center;justify-content:space-between;background:var(--ink);color:var(--white);padding:12px 24px;margin-bottom:24px;animation:fadeUp 0.25s ease both;}
+.notif-bar.show{display:flex;}
+.notif-text{font-size:11px;font-weight:300;letter-spacing:0.5px;display:flex;align-items:center;gap:12px;}
+.notif-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.4s ease-in-out infinite;flex-shrink:0;}
+.notif-refresh{font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.35);color:var(--white);padding:0 0 2px;cursor:pointer;transition:border-color 0.15s;}
+.notif-refresh:hover{border-bottom-color:var(--white);}
+.card-pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin-left:6px;animation:pulse 1.4s ease-in-out infinite;vertical-align:middle;opacity:0;transition:opacity 0.3s;}
+.card-pulse-dot.show{opacity:1;}
+
+/* ══ DE FINALIZAT ══ */
+.fin-section{margin-top:0;}
+.fin-hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;}
+.fin-title{font-size:22px;font-weight:600;color:var(--ink);line-height:1;letter-spacing:-0.5px;}
+.fin-badge{font-size:10px;font-weight:300;letter-spacing:1.5px;color:var(--white);background:var(--red);padding:3px 10px;display:inline-flex;align-items:center;}
+.fin-note{font-size:13px;font-weight:300;color:var(--grey);margin-bottom:24px;line-height:1.6;max-width:700px;}
+.fin-note strong{font-weight:500;color:var(--ink);}
+.fin-tbl-hdr{display:grid;grid-template-columns:36px 1.4fr 1fr 130px 130px;padding:8px 20px;border-bottom:1px solid var(--rule);}
+.fin-tbl-hdr span{font-size:9px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey2);}
+.fin-row{display:grid;grid-template-columns:36px 1.4fr 1fr 130px 130px;padding:14px 20px;border-bottom:1px solid var(--rule);align-items:center;transition:background 0.15s,opacity 0.4s;background:var(--white);}
+.fin-row:last-child{border-bottom:none;}
+.fin-row:hover{background:var(--surface);}
+.fin-num{font-size:11px;font-weight:300;color:var(--grey2);}
+.fin-act{font-size:14px;font-weight:400;color:var(--ink);}
+.fin-ref{font-size:11px;font-weight:300;color:var(--grey);}
+.fin-client{font-size:14px;font-weight:300;color:var(--ink);}
+.fin-date{font-size:12px;font-weight:300;color:var(--ink);}
+.fin-btn{display:block;width:100%;background:var(--red);color:var(--white);font-family:var(--sans);font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;padding:8px 14px;border:none;cursor:pointer;transition:background 0.15s,transform 0.1s;text-align:center;}
+.fin-btn:hover{background:#b02020;}
+.fin-btn:active{transform:scale(0.97);}
+.fin-row.done{opacity:0.3;pointer-events:none;}
+
+/* ══ FOOTER ══ */
+.footer{border-top:1px solid var(--rule);padding-top:14px;margin-top:64px;display:flex;justify-content:space-between;font-size:10px;font-weight:300;color:var(--grey2);letter-spacing:0.5px;}
+.footer-refresh{font-size:10px;font-weight:300;letter-spacing:0.5px;color:var(--grey2);background:none;border:none;cursor:pointer;transition:color 0.15s;padding:0;}
+.footer-refresh:hover{color:var(--ink);}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--white);font-size:11px;font-weight:300;letter-spacing:0.5px;padding:10px 24px;opacity:0;transition:opacity 0.15s,transform 0.2s;pointer-events:none;white-space:nowrap;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Party divider */
+.party-divider{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);padding:14px 0 10px;border-top:1px solid var(--rule);margin-top:14px;margin-bottom:2px;}
+.party-divider:first-child{border-top:none;margin-top:0;padding-top:0;}
+
+/* ══ VIEW A — LIST CARDS ══ */
+.va-list-hdr{border-bottom:1px solid var(--rule);padding:10px 14px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.va-list-hdr-label{font-size:9px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);}
+.va-list-hdr-count{font-size:9px;font-weight:300;color:var(--grey2);}
+.case-card{padding:14px 14px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.15s;border-left:3px solid transparent;}
+.case-card:last-child{border-bottom:none;}
+.case-card:hover{background:var(--surface);}
+.case-card.active{background:var(--surface);border-left:3px solid var(--red);}
+.cc-top{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;}
+.cc-num{font-size:10px;font-weight:300;color:var(--grey2);flex-shrink:0;}
+.cc-act{font-size:13px;font-weight:400;color:var(--ink);line-height:1.3;flex:1;}
+.cc-client{font-size:12px;font-weight:300;color:var(--grey);margin-bottom:5px;}
+.cc-ref{font-size:10px;font-weight:300;color:var(--grey2);margin-bottom:6px;letter-spacing:0.3px;}
+.cc-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.va-detail-view{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+.va-detail-view.show{display:flex;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ══ HEADER ══ -->
+<div class="header-strip">
+  <div class="hs-left">
+    <span class="brand">notariat</span>
+    <span class="brand-pipe">/</span>
+    <span style="font-size:10px;font-weight:300;color:var(--grey);letter-spacing:0.5px;">notariat.co</span>
+  </div>
+  <div class="hs-center">Dashboard birou</div>
+  <div class="hs-right">
+    <span>Cabinet Ionescu · Timișoara</span>
+    <button class="logout-btn">ieșire →</button>
+  </div>
+</div>
+
+<!-- ══ NEW CASE NOTIFICATION BAR ══ -->
+<div class="notif-bar" id="notif-bar">
+  <div class="notif-text">
+    <span class="notif-pulse"></span>
+    <span id="notif-msg">Dosar nou înregistrat — Georgescu Pavel · Declarație notarială</span>
+  </div>
+  <button class="notif-refresh" onclick="dismissNotif()">Reîncarcă ↺</button>
+</div>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow" id="hero-week">—</div>
+    <div class="hero-greeting">Bună ziua,</div>
+    <div class="hero-name">Ana Golana.</div>
+  </div>
+  <div class="hero-right">
+    <div>
+      <div class="office-label">Birou activ</div>
+      <div class="office-name">Cabinet Notarial Ionescu</div>
+      <div class="office-meta">Str. Vasile Alecsandri nr. 1, Timișoara</div>
+    </div>
+    <div class="today-block">
+      <div class="today-label">Programări azi</div>
+      <div class="today-scroll-wrap" id="today-wrap">
+        <div class="today-scroll" id="today-scroll">
+          <div class="today-row"><span class="today-time">10:00</span><span class="today-act">Împuternicire</span><span class="today-name">Dumitrescu Ion</span></div>
+          <div class="today-row"><span class="today-time">11:30</span><span class="today-act">Acord notarial</span><span class="today-name">Popa Daniela</span></div>
+          <div class="today-row"><span class="today-time">14:00</span><span class="today-act">Procură notarială</span><span class="today-name">Popescu Maria-Elena</span></div>
+          <div class="today-row"><span class="today-time">16:00</span><span class="today-act">Legalizare</span><span class="today-name">Moldovan Cristian</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ METRIC CARDS ══ -->
+<div class="cards cards-4" id="metric-cards">
+  <div class="card anim-card">
+    <div class="card-label">Dosare active<span class="card-pulse-dot" id="dot-total"></span></div>
+    <div class="card-value" id="c-total">8</div>
+    <div class="card-sub">luna curentă</div>
+    <div class="card-filter-tag" id="ft-total">toate tipurile</div>
+  </div>
+  <div class="card anim-card">
+    <div class="card-label">Noi<span class="card-pulse-dot" id="dot-new"></span></div>
+    <div class="card-value accent" id="c-new">3</div>
+    <div class="card-sub">necesită acțiune</div>
+  </div>
+  <div class="card anim-card">
+    <div class="card-label">În lucru</div>
+    <div class="card-value" id="c-lucru">3</div>
+    <div class="card-sub">în procesare</div>
+  </div>
+  <div class="card anim-card">
+    <div class="card-label">Programate</div>
+    <div class="card-value" id="c-prog">2</div>
+    <div class="card-sub">confirmate</div>
+  </div>
+</div>
+
+<hr class="rule-hr">
+
+<!-- ══ VOLUME EXPLORER ══ -->
+<div class="section-label">Volum dosare — explorator</div>
+<div class="vol-tabs-row">
+  <span class="vol-tabs-label">Tip act</span>
+  <div class="vol-tabs">
+    <button class="vol-tab active" onclick="setFilter('toate',this)">Toate</button>
+    <button class="vol-tab" onclick="setFilter('procuri',this)">Procuri</button>
+    <button class="vol-tab" onclick="setFilter('declaratii',this)">Declarații</button>
+    <button class="vol-tab" onclick="setFilter('acorduri',this)">Acorduri</button>
+    <button class="vol-tab" onclick="setFilter('legalizari',this)">Legalizări</button>
+    <button class="vol-tab" onclick="setFilter('imputerniciri',this)">Împuterniciri</button>
+  </div>
+</div>
+<div class="vol-desc">
+  <span class="vd-name" id="vd-name">Toate tipurile</span>
+  <span class="vd-body" id="vd-body">Volum total al biroului. Ajustați parametrii pentru a vedea proiecția.</span>
+</div>
+<div class="controls">
+  <div class="ctrl-group">
+    <div class="ctrl-header"><span class="ctrl-label">Dosare / lună</span><span class="ctrl-val" id="v-vol">20</span></div>
+    <input type="range" id="s-vol" min="5" max="60" step="1" value="20">
+    <div class="ctrl-hint">Volumul lunar țintă. Media națională: ~18 dosare/lună per birou urban.</div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-header"><span class="ctrl-label">Zile până la programare</span><span class="ctrl-val" id="v-wait">4</span></div>
+    <input type="range" id="s-wait" min="1" max="14" step="1" value="4">
+    <div class="ctrl-hint">Timp mediu de așteptare din momentul înregistrării până la programare.</div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-header"><span class="ctrl-label">Rată finalizare (%)</span><span class="ctrl-val" id="v-rate">85</span></div>
+    <input type="range" id="s-rate" min="50" max="100" step="1" value="85">
+    <div class="ctrl-hint">Procentul dosarelor programate care ajung la semnare.</div>
+  </div>
+</div>
+<div class="chart-legend">
+  <span class="leg"><span class="leg-bar" style="background:var(--ink)"></span>Dosare înregistrate</span>
+  <span class="leg"><span class="leg-bar" style="background:#cccccc"></span>Dosare finalizate</span>
+  <span class="leg"><span class="leg-line dashed"></span>Tendință & proiecție</span>
+</div>
+<div class="chart-wrap" style="margin-bottom:8px;"><canvas id="volChart"></canvas></div>
+<p class="chart-note" id="vol-chart-note">—</p>
+
+<hr class="rule-hr">
+
+<!-- ══ VIEW SWITCHER + SORT ══ -->
+<div class="view-switcher-wrap">
+  <div class="section-label" style="margin-bottom:0">Dosare active</div>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <div class="sort-bar" style="margin-bottom:0;">
+      <span class="sort-label">Sortare</span>
+      <button class="sort-btn active" id="sb-pref" onclick="setSort('pref',this)">Data preferată</button>
+      <button class="sort-btn" id="sb-status" onclick="setSort('status',this)">Status</button>
+      <button class="sort-btn" id="sb-creat" onclick="setSort('creat',this)">Creat la</button>
+      <button class="sort-btn" id="sb-nume" onclick="setSort('nume',this)">Nume</button>
+    </div>
+    <div style="width:1px;height:20px;background:var(--rule);"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--grey2);">Vizualizare</span>
+      <div class="view-switcher">
+        <button class="view-btn active" id="vbtn-a" onclick="switchView('a')">
+          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="4.8" height="8.8"/><rect x="7.6" y="0.6" width="4.8" height="8.8"/></svg>Paralel
+        </button>
+        <button class="view-btn" id="vbtn-b" onclick="switchView('b')">
+          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="3.5"/><rect x="0.6" y="5.9" width="11.8" height="3.5"/></svg>Sus-jos
+        </button>
+        <button class="view-btn" id="vbtn-c" onclick="switchView('c')">
+          <svg viewBox="0 0 13 10" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="0.6" y="0.6" width="11.8" height="8.8"/><line x1="8" y1="0.6" x2="8" y2="9.4"/></svg>Panou
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW A ══ -->
+<div class="view-container active" id="view-a">
+  <div class="va-wrap">
+    <div class="va-list">
+      <div class="va-list-hdr">
+        <span class="va-list-hdr-label">Dosare</span>
+        <span class="va-list-hdr-count" id="va-count">8</span>
+      </div>
+      <div class="va-list-scroll" id="va-list-scroll"></div>
+    </div>
+    <div class="va-detail">
+      <div class="va-empty" id="va-empty"><div class="va-empty-glyph">—</div><span>Selectați un dosar</span></div>
+      <div class="va-detail-view" id="va-view">
+        <div class="va-dh">
+          <div><div class="va-dh-ref" id="va-ref">—</div><div class="va-dh-name" id="va-name">—</div><div class="va-dh-tags" id="va-tags"></div></div>
+          <button class="close-btn" onclick="closeA()">✕</button>
+        </div>
+        <div class="va-db">
+          <div class="va-db-col">
+            <div class="sub-lbl">Date client</div>
+            <div id="va-fields"></div>
+            <a class="ci-link" id="va-ci" href="#" onclick="return false;" style="display:none">→ Verifică CI încărcat</a>
+            <div id="va-disc"></div>
+          </div>
+          <div class="va-db-col">
+            <div class="sub-lbl">Preferință</div>
+            <div class="pref-box" id="va-pref">—</div>
+            <div class="sub-lbl" style="margin-top:4px;">Programare</div>
+            <span class="inp-lbl">Data</span><input type="date" class="inp-field" id="va-date">
+            <span class="inp-lbl">Ora</span><input type="time" class="inp-field" id="va-time">
+            <span class="inp-lbl">Notițe interne</span>
+            <div class="notes-wrap"><textarea class="notes-field" id="va-notes" placeholder="Observații…" oninput="markDirty('va-dot')" onblur="saveNotes('va-dot',this)"></textarea><span class="notes-dirty-dot" id="va-dot"></span></div>
+            <div class="sub-lbl" style="margin-top:18px;">Istoric</div>
+            <div id="va-hist"></div>
+            <button class="btn-confirm" onclick="confirmProgramare()">Confirmă programarea →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW B ══ -->
+<div class="view-container" id="view-b">
+  <div class="vb-list-wrap">
+    <div class="list-hdr-shared">
+      <span></span><span>Act · Dosar</span><span>Client</span><span>Data preferată</span><span>Status</span>
+    </div>
+    <div class="vb-list-scroll" id="vb-list-scroll"></div>
+  </div>
+  <div class="vb-spacer"></div>
+  <div class="vb-detail" id="vb-detail">
+    <div class="vb-empty" id="vb-empty"><div class="vb-empty-glyph">—</div><span>Selectați un dosar din lista de mai sus</span></div>
+    <div class="vb-open" id="vb-open">
+      <div class="vb-dh">
+        <div><div class="vb-dh-ref" id="vb-ref">—</div><div class="vb-dh-name" id="vb-name">—</div><div class="vb-dh-tags" id="vb-tags"></div></div>
+        <button class="close-btn" onclick="closeB()">✕</button>
+      </div>
+      <div class="vb-db">
+        <div class="vb-db-col">
+          <div class="sub-lbl">Date client</div>
+          <div id="vb-fields"></div>
+          <a class="ci-link" id="vb-ci" href="#" onclick="return false;" style="display:none">→ Verifică CI</a>
+          <div id="vb-disc"></div>
+        </div>
+        <div class="vb-db-col">
+          <div class="sub-lbl">Preferință</div>
+          <div class="pref-box" id="vb-pref">—</div>
+          <div class="sub-lbl" style="margin-top:4px;">Programare</div>
+          <span class="inp-lbl">Data</span><input type="date" class="inp-field" id="vb-date">
+          <span class="inp-lbl">Ora</span><input type="time" class="inp-field" id="vb-time">
+          <span class="inp-lbl">Notițe</span>
+          <div class="notes-wrap"><textarea class="notes-field" id="vb-notes" placeholder="Observații…" oninput="markDirty('vb-dot')" onblur="saveNotes('vb-dot',this)"></textarea><span class="notes-dirty-dot" id="vb-dot"></span></div>
+          <div class="sub-lbl" style="margin-top:16px;">Istoric</div>
+          <div id="vb-hist"></div>
+          <button class="btn-confirm" onclick="confirmProgramare()">Confirmă programarea →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW C ══ -->
+<div class="view-container" id="view-c">
+  <div class="vc-list-wrap">
+    <div class="list-hdr-shared">
+      <span></span><span>Act · Dosar</span><span>Client</span><span>Data preferată</span><span>Status</span>
+    </div>
+    <div class="vc-list-scroll" id="vc-list"></div>
+  </div>
+</div>
+
+<div class="vc-overlay" id="vc-overlay" onclick="closeC()"></div>
+<div class="vc-drawer" id="vc-drawer">
+  <div class="vc-topbar">
+    <div class="vc-topbar-nav">
+      <button class="vc-nav-btn" onclick="navC(-1)">← anterior</button>
+      <span class="vc-pos" id="vc-pos">1 / 8</span>
+      <button class="vc-nav-btn" onclick="navC(1)">următor →</button>
+    </div>
+    <button class="close-btn" onclick="closeC()">✕</button>
+  </div>
+  <div class="vc-dh">
+    <div class="vc-dh-ref" id="vc-ref">—</div>
+    <div class="vc-dh-name" id="vc-name">—</div>
+    <div class="vc-dh-tags" id="vc-tags"></div>
+  </div>
+  <div class="vc-body">
+    <div class="vc-col">
+      <div class="sub-lbl">Date client</div>
+      <div id="vc-fields"></div>
+      <a class="ci-link" id="vc-ci" href="#" onclick="return false;" style="display:none">→ Verifică CI</a>
+      <div id="vc-disc"></div>
+    </div>
+    <div class="vc-col">
+      <div class="sub-lbl">Preferință</div>
+      <div class="pref-box" id="vc-pref">—</div>
+      <div class="sub-lbl" style="margin-top:4px;">Programare</div>
+      <span class="inp-lbl">Data</span><input type="date" class="inp-field" id="vc-date">
+      <span class="inp-lbl">Ora</span><input type="time" class="inp-field" id="vc-time">
+      <span class="inp-lbl">Notițe</span>
+      <div class="notes-wrap"><textarea class="notes-field" id="vc-notes" placeholder="Observații…" oninput="markDirty('vc-dot')" onblur="saveNotes('vc-dot',this)"></textarea><span class="notes-dirty-dot" id="vc-dot"></span></div>
+      <div class="sub-lbl" style="margin-top:16px;">Istoric</div>
+      <div id="vc-hist"></div>
+      <button class="btn-confirm" onclick="confirmProgramare()">Confirmă programarea →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DE FINALIZAT ══ -->
+<hr class="rule-hr">
+<div class="fin-section">
+  <div class="fin-hdr">
+    <div class="fin-title">De finalizat</div>
+    <span class="fin-badge" id="fin-count">2 dosare</span>
+  </div>
+  <p class="fin-note">Dosare cu programare trecută, în așteptarea confirmării semnării și achitării onorariului. <strong>Marcați manual</strong> după ce clientul a semnat și a plătit.</p>
+  <div class="fin-tbl-hdr"><span></span><span>Act · Dosar</span><span>Client</span><span>Programat</span><span></span></div>
+  <div class="fin-row" id="fr-3"><div class="fin-num">03</div><div><div class="fin-act">Împuternicire</div><div class="fin-ref">NOT-2026-0037</div></div><div class="fin-client">Dumitrescu Ion</div><div class="fin-date">14 apr · 10:00</div><div><button class="fin-btn" onclick="markDone('fr-3',this)">Finalizat →</button></div></div>
+  <div class="fin-row" id="fr-7"><div class="fin-num">07</div><div><div class="fin-act">Acord notarial</div><div class="fin-ref">NOT-2026-0031</div></div><div class="fin-client">Popa Daniela</div><div class="fin-date">14 apr · 11:30</div><div><button class="fin-btn" onclick="markDone('fr-7',this)">Finalizat →</button></div></div>
+</div>
+
+<!-- ══ CI MODAL ══ -->
+<div class="ci-modal-overlay" id="ci-overlay" onclick="closeCI()"></div>
+<div class="ci-modal" id="ci-modal">
+  <div class="ci-modal-hdr">
+    <span class="ci-modal-title">Verificare act de identitate</span>
+    <div class="ci-modal-actions">
+      <button class="ci-download-btn" onclick="showToast('Descărcare CI…')">↓ Descarcă</button>
+      <button class="close-btn" onclick="closeCI()">✕</button>
+    </div>
+  </div>
+  <div class="ci-modal-body">
+    <div class="ci-img-pane" id="ci-img-pane">
+      <div class="ci-img-placeholder">
+        <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">▣</div>
+        <div>CI încărcat de client</div>
+        <div style="opacity:0.5;margin-top:4px;">imagine · PDF</div>
+      </div>
+    </div>
+    <div class="ci-fields-pane">
+      <div class="ci-fields-title">Corectați dacă este necesar</div>
+      <div id="ci-fields-edit"></div>
+      <button class="btn-confirm" style="margin-top:20px;" onclick="saveCICorrections()">Salvează corecțiile →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<div class="footer">
+  <span>notariat.co · Cabinet Notarial Ionescu</span>
+  <span id="footer-date">—</span>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ AUTO DATE ══
+(function(){
+  const now=new Date(),M=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'],D=['Duminică','Luni','Marți','Miercuri','Joi','Vineri','Sâmbătă'],d=now.getDay(),mon=new Date(now);
+  mon.setDate(now.getDate()-((d+6)%7));const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const ms=mon.getDate()+(mon.getMonth()!==sun.getMonth()?' '+M[mon.getMonth()]:'');
+  document.getElementById('hero-week').textContent=('Săptămâna '+ms+'–'+sun.getDate()+' '+M[sun.getMonth()]+' '+sun.getFullYear()).toUpperCase();
+  document.getElementById('footer-date').textContent=D[d]+', '+now.getDate()+' '+M[now.getMonth()]+' '+now.getFullYear();
+})();
+
+// ══ TODAY SCROLL HINT ══
+(function(){
+  const sc=document.getElementById('today-scroll'),wr=document.getElementById('today-wrap');
+  function check(){wr.classList.toggle('has-more',sc.scrollHeight>sc.clientHeight&&sc.scrollTop<sc.scrollHeight-sc.clientHeight-2);}
+  sc.addEventListener('scroll',check);setTimeout(check,100);
+})();
+
+// ══ WEB AUDIO ══
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+
+function playTone(freqs,dur,type='sine',vol=0.12){
+  try{
+    const ctx=getCtx();
+    freqs.forEach((f,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.type=type;osc.frequency.value=f;
+      const t=ctx.currentTime+i*0.04;
+      gain.gain.setValueAtTime(0,t);
+      gain.gain.linearRampToValueAtTime(vol,t+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      osc.start(t);osc.stop(t+dur+0.05);
+    });
+  }catch(e){}
+}
+
+// copy: single soft high note
+function soundCopy(){playTone([1047],0.12,'sine',0.1);}
+// confirm programare: two-note ascending
+function soundConfirm(){playTone([523,659],0.2,'sine',0.12);}
+// finalizat: three-note resolution chord
+function soundFinalizat(){playTone([392,494,659],0.35,'sine',0.1);}
+// view switch: very subtle click
+function soundSwitch(){playTone([880],0.06,'sine',0.06);}
+// case select: gentle low tap
+function soundSelect(){playTone([330],0.08,'sine',0.07);}
+// act-type tab: mid-range soft tick
+function soundTabSwitch(){playTone([660],0.07,'sine',0.07);}
+// slider: throttled whisper tone for slider drag
+let sliderSoundTimer=null;
+function soundSlider(){
+  if(sliderSoundTimer)return;
+  sliderSoundTimer=setTimeout(()=>{sliderSoundTimer=null;},80);
+  playTone([440],0.04,'sine',0.05);
+}
+// scroll: fires once per gesture, only when content is actually scrollable
+let scrollActive=false,scrollEndTimer=null;
+function soundScroll(e){
+  const el=e.currentTarget;
+  if(el.scrollHeight<=el.clientHeight+2)return; // not actually overflowing — no sound
+  if(!scrollActive){
+    scrollActive=true;
+    playTone([528],0.18,'sine',0.1);
+  }
+  clearTimeout(scrollEndTimer);
+  scrollEndTimer=setTimeout(()=>{scrollActive=false;},200);
+}
+
+// ══ DATA ══
+const RO_M=['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
+function fmtDate(iso){if(!iso)return null;const[y,m,d]=iso.split('-');return d+' '+RO_M[+m-1]+' '+y;}
+
+const CASES=[
+  {id:1,type:'procuri',act:'Procură notarială',ref:'NOT-2026-0041',client:'Popescu Maria-Elena',status:'nou',flag:true,pref:'24 apr, după-amiaza',prefDate:'2026-04-24',prefSlot:'după-amiaza',alt:'alternativ: 26 apr, dimineața',date:'2026-04-24',time:'14:00',notes:'',created:'10 apr',
+    hist:['10 apr — creat (sistem)','11 apr — CI verificat, diferențe identificate'],
+    disc:[{f:'Prenume',o:'Maria Elena',n:'Maria-Elena'},{f:'CNP',o:'2780415350041',n:'2780415350042'}],
+    fields:[{l:'Prenume',v:'Maria-Elena',m:false,cp:'Maria-Elena'},{l:'Nume',v:'Popescu',m:false,cp:'Popescu'},{l:'CNP',v:'2 780 415 350 042',m:true,cp:'2780415350042'},{l:'Serie CI',v:'IF 123456',m:true,cp:'IF123456'},{l:'Data nașterii',v:'15.04.1978',m:false,cp:'15.04.1978'},{l:'Domiciliu',v:'Str. Mihai Eminescu nr. 12, ap. 4, sector 2',m:false,cp:'Str. Mihai Eminescu nr. 12'},{l:'Telefon',v:'0722 345 678',m:false,cp:'0722345678'},{l:'Email',v:'maria.popescu@gmail.com',m:false,cp:'maria.popescu@gmail.com'}]},
+  {id:2,type:'declaratii',act:'Declarație notarială',ref:'NOT-2026-0039',client:'Gheorghe Andrei',status:'in-lucru',flag:false,pref:'22 apr, dimineața',prefDate:'2026-04-22',prefSlot:'dimineața',alt:'',date:'2026-04-22',time:'09:30',notes:'Aduce certificatul de deces original.',created:'9 apr',
+    hist:['9 apr — creat (sistem)','12 apr — status: În lucru'],disc:[],
+    fields:[{l:'Prenume',v:'Andrei',m:false,cp:'Andrei'},{l:'Nume',v:'Gheorghe',m:false,cp:'Gheorghe'},{l:'CNP',v:'1 650 823 210 045',m:true,cp:'1650823210045'},{l:'Serie CI',v:'B 543210',m:true,cp:'B543210'},{l:'Data nașterii',v:'23.08.1965',m:false,cp:'23.08.1965'},{l:'Domiciliu',v:'Bd. Unirii nr. 45, bl. D2, ap. 18, sector 4',m:false,cp:'Bd. Unirii nr. 45'},{l:'Telefon',v:'0744 112 233',m:false,cp:'0744112233'},{l:'Email',v:'andrei.gheorghe@gmail.com',m:false,cp:'andrei.gheorghe@gmail.com'}]},
+  {id:3,type:'imputerniciri',act:'Împuternicire',ref:'NOT-2026-0037',client:'Dumitrescu Ion',status:'programat',flag:false,pref:'azi, 10:00',prefDate:'2026-04-14',prefSlot:'10:00',alt:'',date:'2026-04-14',time:'10:00',notes:'',created:'8 apr',
+    hist:['8 apr — creat (sistem)','11 apr — programat: 14 apr 10:00'],disc:[],
+    fields:[{l:'Prenume',v:'Ion',m:false,cp:'Ion'},{l:'Nume',v:'Dumitrescu',m:false,cp:'Dumitrescu'},{l:'CNP',v:'1 550 312 440 033',m:true,cp:'1550312440033'},{l:'Serie CI',v:'CJ 987654',m:true,cp:'CJ987654'},{l:'Data nașterii',v:'12.03.1955',m:false,cp:'12.03.1955'},{l:'Domiciliu',v:'Str. Florilor nr. 3, Cluj-Napoca',m:false,cp:'Str. Florilor nr. 3'},{l:'Telefon',v:'0766 987 001',m:false,cp:'0766987001'},{l:'Email',v:'ion.dumitrescu@gmail.com',m:false,cp:'ion.dumitrescu@gmail.com'}]},
+  {id:4,type:'acorduri',act:'Acord notarial',ref:'NOT-2026-0036',client:'Stancu Ioana',status:'nou',flag:false,pref:'flexibil',prefDate:null,prefSlot:'21–25 apr',alt:'',date:'',time:'',notes:'',created:'11 apr',
+    hist:['11 apr — creat (sistem)'],disc:[],
+    fields:[{l:'Prenume',v:'Ioana',m:false,cp:'Ioana'},{l:'Nume',v:'Stancu',m:false,cp:'Stancu'},{l:'CNP',v:'2 900 719 350 088',m:true,cp:'2900719350088'},{l:'Serie CI',v:'MM 445566',m:true,cp:'MM445566'},{l:'Data nașterii',v:'19.07.1990',m:false,cp:'19.07.1990'},{l:'Domiciliu',v:'Str. Victoriei nr. 88, sector 1',m:false,cp:'Str. Victoriei nr. 88'},{l:'Telefon',v:'0733 009 876',m:false,cp:'0733009876'},{l:'Email',v:'ioana.stancu@gmail.com',m:false,cp:'ioana.stancu@gmail.com'}]},
+  {id:5,type:'legalizari',act:'Legalizare semnătură',ref:'NOT-2026-0034',client:'Moldovan Cristian',status:'in-lucru',flag:false,pref:'17 apr, dimineața',prefDate:'2026-04-17',prefSlot:'dimineața',alt:'',date:'2026-04-17',time:'09:00',notes:'',created:'7 apr',
+    hist:['7 apr — creat (sistem)','10 apr — status: În lucru'],disc:[],
+    fields:[{l:'Prenume',v:'Cristian',m:false,cp:'Cristian'},{l:'Nume',v:'Moldovan',m:false,cp:'Moldovan'},{l:'CNP',v:'1 880 517 260 077',m:true,cp:'1880517260077'},{l:'Serie CI',v:'CJ 334455',m:true,cp:'CJ334455'},{l:'Data nașterii',v:'17.05.1988',m:false,cp:'17.05.1988'},{l:'Domiciliu',v:'Aleea Mureșului nr. 7, Cluj-Napoca',m:false,cp:'Aleea Mureșului nr. 7'},{l:'Telefon',v:'0756 441 220',m:false,cp:'0756441220'},{l:'Email',v:'cristian.moldovan@gmail.com',m:false,cp:'cristian.moldovan@gmail.com'}]},
+  {id:6,type:'declaratii',act:'Declarație notarială',ref:'NOT-2026-0033',client:'Niculescu Vasile',status:'nou',flag:false,pref:'flexibil',prefDate:null,prefSlot:'orice zi',alt:'',date:'',time:'',notes:'',created:'12 apr',
+    hist:['12 apr — creat (sistem)'],disc:[],
+    fields:[{l:'Prenume',v:'Vasile',m:false,cp:'Vasile'},{l:'Nume',v:'Niculescu',m:false,cp:'Niculescu'},{l:'CNP',v:'1 470 302 350 061',m:true,cp:'1470302350061'},{l:'Serie CI',v:'BV 221133',m:true,cp:'BV221133'},{l:'Data nașterii',v:'02.03.1947',m:false,cp:'02.03.1947'},{l:'Domiciliu',v:'Str. Republicii nr. 22, Brașov',m:false,cp:'Str. Republicii nr. 22'},{l:'Telefon',v:'0722 001 002',m:false,cp:'0722001002'},{l:'Email',v:'vasile.niculescu@gmail.com',m:false,cp:'vasile.niculescu@gmail.com'}]},
+  {id:7,type:'acorduri',act:'Acord notarial',ref:'NOT-2026-0031',client:'Popa Daniela',status:'programat',flag:false,pref:'azi, 11:30',prefDate:'2026-04-14',prefSlot:'11:30',alt:'',date:'2026-04-14',time:'11:30',notes:'',created:'9 apr',
+    hist:['9 apr — creat (sistem)','11 apr — programat: 14 apr 11:30'],disc:[],
+    fields:[{l:'Prenume',v:'Daniela',m:false,cp:'Daniela'},{l:'Nume',v:'Popa',m:false,cp:'Popa'},{l:'CNP',v:'2 830 614 180 099',m:true,cp:'2830614180099'},{l:'Serie CI',v:'IS 556677',m:true,cp:'IS556677'},{l:'Data nașterii',v:'14.06.1983',m:false,cp:'14.06.1983'},{l:'Domiciliu',v:'Str. Lăpușneanu nr. 14, Iași',m:false,cp:'Str. Lăpușneanu nr. 14'},{l:'Telefon',v:'0788 345 001',m:false,cp:'0788345001'},{l:'Email',v:'daniela.popa@gmail.com',m:false,cp:'daniela.popa@gmail.com'}]},
+  {id:8,type:'imputerniciri',act:'Împuternicire',ref:'NOT-2026-0029',client:'Bălan Mihai',status:'in-lucru',flag:false,pref:'14 apr, după-amiaza',prefDate:'2026-04-14',prefSlot:'după-amiaza',alt:'',date:'2026-04-14',time:'15:00',notes:'',created:'13 apr',
+    hist:['13 apr — creat (sistem)','14 apr — status: În lucru'],disc:[],
+    fields:[{l:'Prenume',v:'Mihai',m:false,cp:'Mihai'},{l:'Nume',v:'Bălan',m:false,cp:'Bălan'},{l:'CNP',v:'1 991 204 400 055',m:true,cp:'1991204400055'},{l:'Serie CI',v:'PH 778899',m:true,cp:'PH778899'},{l:'Data nașterii',v:'04.12.1999',m:false,cp:'04.12.1999'},{l:'Domiciliu',v:'Str. Gării nr. 5, Ploiești',m:false,cp:'Str. Gării nr. 5'},{l:'Telefon',v:'0799 112 334',m:false,cp:'0799112334'},{l:'Email',v:'mihai.balan@gmail.com',m:false,cp:'mihai.balan@gmail.com'}]},
+];
+
+const ACT_INFO={
+  toate:{name:'Toate tipurile',body:'Volum total al biroului pe toate tipurile de acte.'},
+  procuri:{name:'Procuri',body:'Procuri notariale — mandate și reprezentări. <strong>Medie națională:</strong> 4–6 dosare/lună.'},
+  declaratii:{name:'Declarații',body:'Declarații autentificate. <strong>Cel mai frecvent tip</strong> — consimțăminte și confirmări.'},
+  acorduri:{name:'Acorduri',body:'Acorduri și convenții. Volum sezonier — vârf în T2 și T4.'},
+  legalizari:{name:'Legalizări',body:'Legalizări semnătură. <strong>Procesare rapidă</strong> — timp mediu: sub 30 min.'},
+  imputerniciri:{name:'Împuterniciri',body:'Împuterniciri speciale și generale. <strong>Volum diaspora</strong> semnificativ.'},
+};
+
+const TAGS={
+  'nou':'<span class="status-badge status-nou"><span class="status-dot"></span>Nou</span>',
+  'in-lucru':'<span class="status-badge status-lucru"><span class="status-dot"></span>În lucru</span>',
+  'programat':'<span class="status-badge status-programat"><span class="status-dot"></span>Programat</span>',
+};
+
+// ══ DATE CELL RENDERER ══
+// Two-line: "24 aprilie 2026" / "după-amiaza"  or "flexibil" / "21–25 apr"
+function dateCell(c){
+  const main=c.prefDate?fmtDate(c.prefDate):'flexibil';
+  const slot=c.prefSlot||'—';
+  return `<div class="l-date"><span class="l-date-main">${main}</span><span class="l-date-slot">${slot}</span></div>`;
+}
+
+let currentFilter='toate',currentView=localStorage.getItem('notariat_view')||'a';
+
+// ══ RENDERERS ══
+function renderFields(fields){
+  const g=fields.slice(0,4).map(f=>`<div class="field-stacked" onclick="cp('${f.cp}','${f.l} copiat')" style="animation-delay:${fields.indexOf(f)*30}ms"><span class="fs-lbl">${f.l}</span><span class="fs-val${f.m?' mono':''}">${f.v}</span></div>`).join('');
+  const r=fields.slice(4).map(f=>`<div class="field-stacked" onclick="cp('${f.cp}','${f.l} copiat')" style="animation-delay:${fields.indexOf(f)*30}ms"><span class="fs-lbl">${f.l}</span><span class="fs-val${f.m?' mono':''}">${f.v}</span></div>`).join('');
+  return `<div class="field-grid-2">${g}</div>${r}`;
+}
+function renderDisc(disc,prefix,caseId){
+  if(!disc.length)return '';
+  return `<div class="disc-block" style="margin-top:14px;"><div class="disc-hdr"><span class="disc-hdr-label">Diferențe CI</span><span class="disc-hdr-count">${disc.length} câmpuri</span></div>${disc.map((d,i)=>`<div class="disc-row" id="${prefix}-${i}"><div class="disc-field">${d.f}</div><div><div class="disc-old">${d.o}</div><div class="disc-new">${d.n}</div></div><button class="disc-accept" onclick="acceptD('${prefix}-${i}',this,${caseId},${i})">Acceptă</button></div>`).join('')}</div>`;
+}
+function populateView(prefix,c){
+  currentOpenCase=c.id;
+  document.getElementById(prefix+'-ref').textContent=c.ref+' · '+c.act;
+  document.getElementById(prefix+'-name').textContent=c.client;
+  document.getElementById(prefix+'-tags').innerHTML=TAGS[c.status]+(c.flag?'<span class="tag-ci">· CI diferențe</span>':'');
+  document.getElementById(prefix+'-pref').innerHTML='preferă <strong>'+c.pref+'</strong>'+(c.alt?' — '+c.alt:'');
+  document.getElementById(prefix+'-date').value=c.date;
+  document.getElementById(prefix+'-time').value=c.time;
+  if(document.getElementById(prefix+'-notes'))document.getElementById(prefix+'-notes').value=c.notes;
+  document.getElementById(prefix+'-hist').innerHTML=c.hist.map(h=>`<div class="hist-item">${h}</div>`).join('');
+  document.getElementById(prefix+'-fields').innerHTML=renderFields(c.fields);
+  document.getElementById(prefix+'-ci').style.display=c.flag?'inline-block':'none';
+  document.getElementById(prefix+'-disc').innerHTML=renderDisc(c.disc,prefix+'-d-'+c.id,c.id);
+}
+
+function sharedRow(c,i,clickFn){
+  const sCls=c.status==='nou'?'nou':c.status==='in-lucru'?'lucru':'programat';
+  const sLbl=c.status==='nou'?'Nou':c.status==='in-lucru'?'În lucru':'Programat';
+  return `<div class="list-row-shared" data-id="${c.id}" data-idx="${i}" onclick="${clickFn}">
+    <div class="l-num">${String(c.id).padStart(2,'0')}</div>
+    <div><div class="l-act">${c.act}</div><div class="l-ref">${c.ref}</div>${c.flag?'<div class="l-flag">CI diferențe</div>':''}</div>
+    <div class="l-client">${c.client}</div>
+    ${dateCell(c)}
+    <span class="status-badge status-${sCls}"><span class="status-dot"></span>${sLbl}</span>
+  </div>`;
+}
+
+// ══ VIEW A ══
+function buildListA(cases){
+  document.getElementById('va-list-scroll').innerHTML=cases.map(c=>`
+    <div class="case-card" data-id="${c.id}" onclick="selA(${c.id})">
+      <div class="cc-top"><span class="cc-num">${String(c.id).padStart(2,'0')}</span><span class="cc-act">${c.act}</span></div>
+      <div class="cc-client">${c.client}</div>
+      <div class="cc-ref">${c.ref}</div>
+      <div class="cc-tags">${TAGS[c.status]}${c.flag?'<span class="tag-ci"> · CI</span>':''}</div>
+    </div>`).join('');
+  document.getElementById('va-count').textContent=cases.length;
+}
+function selA(id){
+  soundSelect();
+  document.querySelectorAll('#va-list-scroll .case-card').forEach(r=>r.classList.remove('active'));
+  const card=document.querySelector('#va-list-scroll [data-id="'+id+'"]');
+  if(card)card.classList.add('active');
+  document.getElementById('va-empty').style.display='none';
+  const view=document.getElementById('va-view');
+  view.classList.add('show');
+  view.classList.remove('detail-fade');
+  void view.offsetWidth;
+  view.classList.add('detail-fade');
+  populateView('va',CASES.find(x=>x.id===id));
+}
+function closeA(){
+  document.getElementById('va-view').classList.remove('show');
+  document.getElementById('va-empty').style.display='';
+  document.querySelectorAll('#va-list-scroll .case-card').forEach(r=>r.classList.remove('active'));
+}
+
+// ══ VIEW B ══
+function buildListB(cases){
+  document.getElementById('vb-list-scroll').innerHTML=cases.map((c,i)=>sharedRow(c,i,`selB(${c.id})`)).join('');
+}
+function selB(id){
+  soundSelect();
+  document.querySelectorAll('.vb-list-scroll .list-row-shared').forEach(r=>r.classList.remove('active'));
+  const row=document.querySelector('.vb-list-scroll [data-id="'+id+'"]');
+  if(row)row.classList.add('active');
+  document.getElementById('vb-empty').style.display='none';
+  document.getElementById('vb-open').classList.add('show');
+  populateView('vb',CASES.find(x=>x.id===id));
+}
+function closeB(){
+  document.getElementById('vb-open').classList.remove('show');
+  document.getElementById('vb-empty').style.display='';
+  document.querySelectorAll('.vb-list-scroll .list-row-shared').forEach(r=>r.classList.remove('active'));
+}
+
+// ══ VIEW C ══
+let vcIdx=0;
+function buildListC(cases){
+  document.getElementById('vc-list').innerHTML=cases.map((c,i)=>sharedRow(c,i,`openC(${i})`)).join('');
+}
+function populateC(idx,cases){
+  const c=cases[idx];
+  document.querySelectorAll('.vc-list-scroll .list-row-shared').forEach(r=>r.classList.remove('active'));
+  const row=document.querySelector('.vc-list-scroll [data-idx="'+idx+'"]');
+  if(row)row.classList.add('active');
+  document.getElementById('vc-pos').textContent=(idx+1)+' / '+cases.length;
+  populateView('vc',c);
+}
+function openC(idx){
+  soundSelect();
+  const filtered=getFiltered();vcIdx=idx;
+  populateC(idx,filtered);
+  document.getElementById('vc-overlay').classList.add('show');
+  document.getElementById('vc-drawer').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeC(){
+  document.getElementById('vc-overlay').classList.remove('show');
+  document.getElementById('vc-drawer').classList.remove('show');
+  document.body.style.overflow='';
+  document.querySelectorAll('.vc-list-scroll .list-row-shared').forEach(r=>r.classList.remove('active'));
+}
+function navC(dir){const filtered=getFiltered();vcIdx=(vcIdx+dir+filtered.length)%filtered.length;populateC(vcIdx,filtered);}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('vc-drawer').classList.contains('show'))return;
+  if(e.key==='Escape')closeC();
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navC(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')navC(-1);
+});
+
+// ══ FILTER + SORT ══
+function getFiltered(){
+  const base=currentFilter==='toate'?CASES:CASES.filter(c=>c.type===currentFilter);
+  return sortCases(base);
+}
+function rebuildAllLists(){
+  const f=getFiltered();
+  buildListA(f);buildListB(f);buildListC(f);
+  const nou=f.filter(c=>c.status==='nou').length;
+  const lucru=f.filter(c=>c.status==='in-lucru').length;
+  const prog=f.filter(c=>c.status==='programat').length;
+  document.getElementById('c-total').textContent=f.length;
+  document.getElementById('c-new').textContent=nou;
+  document.getElementById('c-lucru').textContent=lucru;
+  document.getElementById('c-prog').textContent=prog;
+  const tag=document.getElementById('ft-total');
+  tag.textContent=ACT_INFO[currentFilter].name;
+  tag.className='card-filter-tag'+(currentFilter!=='toate'?' is-active':'');
+}
+function setFilter(type,btn){
+  soundTabSwitch();
+  currentFilter=type;
+  document.querySelectorAll('.vol-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('vd-name').textContent=ACT_INFO[type].name;
+  document.getElementById('vd-body').innerHTML=ACT_INFO[type].body;
+  rebuildAllLists();closeA();closeB();closeC();
+}
+
+// ══ VIEW SWITCHER ══
+function switchView(v){
+  soundSwitch();
+  currentView=v;localStorage.setItem('notariat_view',v);
+  ['a','b','c'].forEach(x=>{
+    document.getElementById('view-'+x).classList.toggle('active',x===v);
+    document.getElementById('vbtn-'+x).classList.toggle('active',x===v);
+  });
+  closeA();closeB();closeC();
+}
+
+// ══ SORT ══
+let currentSort='pref';
+const STATUS_ORDER={'nou':0,'in-lucru':1,'programat':2};
+function sortCases(cases){
+  const c=[...cases];
+  if(currentSort==='pref') return c.sort((a,b)=>{
+    if(!a.prefDate&&!b.prefDate)return 0;
+    if(!a.prefDate)return 1;if(!b.prefDate)return -1;
+    return a.prefDate.localeCompare(b.prefDate);
+  });
+  if(currentSort==='status') return c.sort((a,b)=>STATUS_ORDER[a.status]-STATUS_ORDER[b.status]);
+  if(currentSort==='creat') return c.sort((a,b)=>b.id-a.id);
+  if(currentSort==='nume') return c.sort((a,b)=>a.client.localeCompare(b.client,'ro'));
+  return c;
+}
+function setSort(key,btn){
+  currentSort=key;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  rebuildAllLists();
+}
+
+// ══ NOTES DOT + SAVE ══
+function markDirty(dotId){const d=document.getElementById(dotId);if(d)d.classList.add('show');}
+function saveNotes(dotId,el){const d=document.getElementById(dotId);if(d)d.classList.remove('show');showToast('Notițe salvate');}
+
+// ══ DISC BLOCK AUTO-REMOVE + FIELD APPLY ══
+function acceptD(id,btn,caseId,discIdx){
+  const row=document.getElementById(id);
+  if(!row)return;
+  row.classList.add('accepted');
+  btn.textContent='Acceptat';btn.onclick=null;
+  // Apply corrected value to CASES data
+  if(caseId!=null&&discIdx!=null){
+    const c=CASES.find(x=>x.id===caseId);
+    if(c&&c.disc[discIdx]){
+      const d=c.disc[discIdx];
+      const field=c.fields.find(f=>f.l===d.f);
+      if(field){field.v=d.n;field.cp=d.n.replace(/\s/g,'');}
+      // Re-render fields in all open detail panels
+      ['va','vb','vc'].forEach(pfx=>{
+        const el=document.getElementById(pfx+'-fields');
+        if(el&&el.closest('.show,.active'))el.innerHTML=renderFields(c.fields);
+        else if(el&&document.getElementById('view-'+pfx.slice(-1))&&document.getElementById('view-'+pfx.slice(-1)).classList.contains('active'))
+          el.innerHTML=renderFields(c.fields);
+      });
+    }
+  }
+  // Auto-remove block when all accepted
+  const block=row.closest('.disc-block');
+  if(block){
+    const all=block.querySelectorAll('.disc-row');
+    const done=block.querySelectorAll('.disc-row.accepted');
+    if(all.length===done.length){
+      setTimeout(()=>{
+        block.style.transition='opacity 0.5s, max-height 0.6s';
+        block.style.overflow='hidden';block.style.maxHeight=block.offsetHeight+'px';
+        requestAnimationFrame(()=>{block.style.opacity='0';block.style.maxHeight='0';});
+        setTimeout(()=>block.remove(),600);
+      },300);
+    }
+  }
+  showToast('Valoare acceptată');
+}
+
+// ══ DE FINALIZAT + COLLAPSE ══
+let finN=2;
+function markDone(id,btn){
+  soundFinalizat();
+  document.getElementById(id).classList.add('done');
+  btn.textContent='Marcat ✓';
+  finN=Math.max(0,finN-1);
+  document.getElementById('fin-count').textContent=finN+(finN===1?' dosar':' dosare');
+  showToast('Dosar marcat finalizat');
+  if(finN===0){
+    setTimeout(()=>{
+      const sec=document.querySelector('.fin-section');
+      const hr=sec&&sec.previousElementSibling;
+      if(sec){sec.style.transition='opacity 0.5s';sec.style.opacity='0';setTimeout(()=>{sec.remove();if(hr&&hr.classList.contains('rule-hr'))hr.remove();},500);}
+    },700);
+  }
+}
+
+// ══ CONFIRM PROGRAMARE ══
+function confirmProgramare(){soundConfirm();showToast('Programare salvată');}
+
+// ══ CI MODAL ══
+let currentOpenCase=null;
+function openCI(caseId){
+  const c=CASES.find(x=>x.id===caseId);if(!c)return;
+  document.getElementById('ci-fields-edit').innerHTML=c.fields.map(f=>`
+    <div style="margin-bottom:14px;">
+      <span class="inp-lbl">${f.l}</span>
+      <input class="inp-field" value="${f.v}" style="margin-bottom:0;" data-field="${f.l}">
+    </div>`).join('');
+  document.getElementById('ci-overlay').classList.add('show');
+  document.getElementById('ci-modal').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeCI(){
+  document.getElementById('ci-overlay').classList.remove('show');
+  document.getElementById('ci-modal').classList.remove('show');
+  document.body.style.overflow='';
+}
+function saveCICorrections(){showToast('Corecții salvate');closeCI();}
+// Wire all ci-link clicks to openCI
+document.addEventListener('click',e=>{
+  if(e.target.closest('.ci-link')){e.preventDefault();if(currentOpenCase)openCI(currentOpenCase);}
+});
+
+// ══ NEW CASE NOTIFICATION ══
+function showNewCaseNotif(){
+  document.getElementById('notif-bar').classList.add('show');
+  document.getElementById('dot-total').classList.add('show');
+  document.getElementById('dot-new').classList.add('show');
+}
+function dismissNotif(){
+  document.getElementById('notif-bar').classList.remove('show');
+  document.getElementById('dot-total').classList.remove('show');
+  document.getElementById('dot-new').classList.remove('show');
+  showToast('Dashboard reîncărcat');
+}
+// Demo trigger: show notification after 10s
+setTimeout(showNewCaseNotif,10000);
+
+// ══ CHART ══
+// 6 historical months only — no projection axis
+const MONTHS_H=['Nov','Dec','Ian','Feb','Mar','Apr'],ACT_V=[16,13,18,17,20,20],ACT_F=[13,11,15,14,17,17];
+let volChart,sv=20,sw=4,sr=85;
+function buildLineData(){
+  const eff=Math.max(0.6,1-(sw-1)*0.04)*(sr/100);
+  return ACT_V.map(v=>Math.round(v*eff));
+}
+
+window.addEventListener('load',()=>{
+  const ctx=document.getElementById('volChart');
+  if(ctx){
+    volChart=new Chart(ctx,{
+      data:{
+        labels:MONTHS_H,
+        datasets:[
+          {type:'bar',label:'Înregistrate',data:[...ACT_V],backgroundColor:'#0d0d0d',barPercentage:0.7,categoryPercentage:0.65,order:2},
+          {type:'bar',label:'Finalizate',data:[...ACT_F],backgroundColor:'#cccccc',barPercentage:0.7,categoryPercentage:0.65,order:2},
+          {type:'line',label:'Tendință & proiecție',data:buildLineData(),borderColor:'#d42b2b',borderWidth:2,borderDash:[5,4],pointBackgroundColor:'#d42b2b',pointBorderColor:'#ffffff',pointBorderWidth:2,pointRadius:3.5,tension:0.3,fill:false,order:0}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#0d0d0d',
+            titleFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},
+            bodyFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},
+            padding:10,cornerRadius:2,
+            callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}
+          }
+        },
+        scales:{
+          x:{
+            stacked:false,
+            grid:{display:false},
+            ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555'},
+            border:{display:false}
+          },
+          y:{
+            stacked:false,
+            grid:{color:'#e8e8e8'},
+            ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555',stepSize:5},
+            border:{display:false}
+          }
+        }
+      }
+    });
+    updateChartNote();
+    document.getElementById('s-vol').addEventListener('input',function(){sv=+this.value;document.getElementById('v-vol').textContent=sv;soundSlider();updateChart();});
+    document.getElementById('s-wait').addEventListener('input',function(){sw=+this.value;document.getElementById('v-wait').textContent=sw;soundSlider();updateChart();});
+    document.getElementById('s-rate').addEventListener('input',function(){sr=+this.value;document.getElementById('v-rate').textContent=sr;soundSlider();updateChart();});
+  }
+  switchView(currentView);
+  rebuildAllLists();
+  selA(1);
+  // ── SCROLL SOUNDS — one tone per gesture, silent during momentum
+  ['today-scroll','va-list-scroll','vb-list-scroll','vc-list'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('scroll',soundScroll,{passive:true});
+  });
+});
+
+function updateChart(){
+  if(!volChart)return;
+  volChart.data.datasets[2].data=buildLineData();
+  volChart.update('active');
+  updateChartNote();
+}
+function updateChartNote(){
+  const effAdj=Math.max(0.6,1-(sw-1)*0.04),proj=Math.round(sv*(sr/100)*effAdj);
+  document.getElementById('vol-chart-note').innerHTML='La <strong>'+sv+' dosare/lună</strong> cu rată de finalizare <strong>'+sr+'%</strong> și timp mediu <strong>'+sw+' zile</strong> — eficiență lunară estimată: <strong>'+proj+' dosare finalizate</strong>.';
+}
+
+// ══ HELPERS ══
+let toastTimer;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1600);}
+function cp(val,label){soundCopy();navigator.clipboard.writeText(val).catch(()=>{});showToast(label);}
+</script>
+</body>
+</html>
