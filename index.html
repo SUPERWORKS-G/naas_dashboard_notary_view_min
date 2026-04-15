@@ -6,13 +6,12 @@
 <title>notariat.co — Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
   --ink:#0d0d0d; --white:#ffffff; --red:#d42b2b; --red-lt:#fdeaea;
   --grey:#555; --grey2:#aaa; --rule:#d8d6cf; --bg:#ffffff; --surface:#f5f5f3;
   --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.6;}
 .page{max-width:1160px;margin:0 auto;padding:0 44px 96px;background:#fff;}
 
@@ -48,7 +47,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .hero{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);margin-bottom:56px;background:var(--white);}
 .hero-left{padding:52px 52px 52px 0;border-right:1px solid var(--rule);}
 .hero-eyebrow{font-size:10px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:var(--grey);margin-bottom:20px;}
-.hero-greeting{font-family:var(--sans);font-size:68px;font-weight:300;line-height:0.95;letter-spacing:-2px;color:var(--ink);}
+.hero-greeting{font-family:var(--sans);font-size:68px;font-weight:700;line-height:0.95;letter-spacing:-2px;color:var(--ink);}
 .hero-name{font-family:var(--sans);font-size:68px;font-weight:700;line-height:0.95;letter-spacing:-2px;color:var(--red);}
 .hero-right{padding:52px 0 52px 52px;display:flex;flex-direction:column;justify-content:space-between;background:var(--white);}
 .office-label{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:10px;}
@@ -86,6 +85,8 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 /* ══ RULE + LABELS ══ */
 .rule-hr{border:none;border-top:1px solid var(--rule);margin:56px 0;}
 .section-label{font-size:10px;font-weight:300;letter-spacing:2.5px;text-transform:uppercase;color:var(--grey2);margin-bottom:20px;}
+.vol-toggle-btn{font-size:22px;font-weight:300;line-height:1;color:var(--grey2);background:none;border:none;cursor:pointer;padding:0;width:22px;text-align:center;transition:color 0.15s;flex-shrink:0;}
+.vol-toggle-btn:hover{color:var(--ink);}
 
 /* ══ VOLUME EXPLORER ══ */
 .vol-tabs-row{display:flex;align-items:center;gap:24px;margin-bottom:20px;}
@@ -138,7 +139,8 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 /* ══ SHARED LIST COLUMNS ══ */
 .list-hdr-shared{display:grid;grid-template-columns:36px 2fr 1.4fr 140px 100px;padding:9px 20px;background:var(--surface);border-bottom:1px solid var(--rule);}
 .list-hdr-shared span{font-size:9px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey2);}
-.list-row-shared{display:grid;grid-template-columns:36px 2fr 1.4fr 140px 100px;padding:13px 20px;border-bottom:none;cursor:pointer;transition:background 0.15s;align-items:center;border-left:3px solid transparent;}
+.list-row-shared{display:grid;grid-template-columns:36px 2fr 1.4fr 140px 100px;padding:12px 20px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.15s;align-items:center;border-left:3px solid transparent;}
+.list-row-shared:last-child{border-bottom:none;}
 .list-row-shared:hover{background:var(--surface);}
 .list-row-shared.active{background:var(--surface);border-left:3px solid var(--red);}
 .list-row-shared.filtered-out{display:none;}
@@ -168,14 +170,14 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 
 /* ══ SHARED FIELD COMPONENTS ══ */
 .field-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
-.field-stacked{padding:10px 4px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.15s;}
+.field-stacked{padding:10px 0;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.15s;}
 .field-stacked:hover{background:var(--surface);}
 .field-stacked:active{animation:flash 0.28s ease;}
 .fs-lbl{font-size:10px;font-weight:300;text-transform:uppercase;color:var(--grey2);letter-spacing:1.5px;margin-bottom:3px;display:block;}
 .fs-val{font-size:14px;font-weight:400;color:var(--ink);display:block;line-height:1.3;}
 .fs-val.mono{font-size:13px;font-weight:300;letter-spacing:0.5px;}
 .sub-lbl{font-size:10px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:var(--grey2);margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--rule);}
-.ci-link{display:inline-block;font-size:11px;font-weight:300;letter-spacing:0.5px;color:var(--red);text-decoration:none;cursor:pointer;margin-top:14px;transition:opacity 0.15s;text-transform:uppercase;letter-spacing:1px;}
+.ci-link{display:inline-block;font-size:11px;font-weight:300;letter-spacing:1px;text-transform:uppercase;color:var(--red);text-decoration:none;cursor:pointer;margin-top:14px;transition:opacity 0.15s;}
 .ci-link:hover{opacity:0.6;}
 .disc-block{margin-top:16px;border-left:2px solid var(--red);padding-left:14px;}
 .disc-hdr{display:flex;justify-content:space-between;margin-bottom:8px;}
@@ -208,8 +210,8 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .btn-confirm:active{transform:scale(0.98);}
 
 /* Close button */
-.close-btn{width:28px;height:28px;border-radius:50%;background:none;border:1px solid var(--rule);cursor:pointer;color:var(--grey);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;}
-.close-btn:hover{border-color:var(--ink);color:var(--ink);transform:rotate(90deg);}
+.close-btn{font-size:22px;font-weight:300;line-height:1;color:var(--grey2);background:none;border:none;cursor:pointer;padding:0;width:22px;text-align:center;transition:color 0.15s;flex-shrink:0;}
+.close-btn:hover{color:var(--ink);}
 
 /* ══ VIEW A — SIDE BY SIDE ══ */
 .va-wrap{display:grid;grid-template-columns:268px 1fr;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);height:680px;background:var(--white);}
@@ -223,8 +225,8 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .va-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
 .va-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
 .va-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.va-db{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;}
-.va-db-col{padding:20px 24px;overflow-y:auto;max-height:100%;scrollbar-width:none;-ms-overflow-style:none;}
+.va-db{display:grid;grid-template-columns:1fr 280px;flex:1;min-height:0;overflow:hidden;}
+.va-db-col{padding:20px 24px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
 .va-db-col::-webkit-scrollbar{display:none;}
 .va-db-col:first-child{border-right:1px solid var(--rule);}
 
@@ -238,12 +240,12 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .vb-empty-glyph{font-size:40px;font-weight:200;color:var(--rule);}
 .vb-open{display:none;flex-direction:column;flex:1;min-height:0;}
 .vb-open.show{display:flex;}
-.vb-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;flex-shrink:0;}
+.vb-dh{padding:18px 20px 14px 0;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:start;flex-shrink:0;}
 .vb-dh-ref{font-size:10px;font-weight:300;color:var(--grey);margin-bottom:4px;letter-spacing:0.5px;}
 .vb-dh-name{font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:8px;letter-spacing:-0.5px;}
 .vb-dh-tags{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .vb-db{display:grid;grid-template-columns:1fr 280px;flex:1;min-height:0;overflow:hidden;}
-.vb-db-col{padding:20px 24px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.vb-db-col{padding:18px 20px 18px 0;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;}
 .vb-db-col::-webkit-scrollbar{display:none;}
 .vb-db-col:first-child{border-right:1px solid var(--rule);}
 
@@ -257,7 +259,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 .vc-drawer.show{transform:translateX(0);}
 .vc-topbar{border-bottom:1px solid var(--rule);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .vc-topbar-nav{display:flex;align-items:center;gap:14px;}
-.vc-nav-btn{font-size:10px;font-weight:300;letter-spacing:1px;color:var(--grey);background:none;border:none;padding:0 0 3px;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:1px;}
+.vc-nav-btn{font-size:10px;font-weight:300;letter-spacing:1px;text-transform:uppercase;color:var(--grey);background:none;border:none;padding:0 0 3px;border-bottom:1px solid transparent;cursor:pointer;transition:all 0.15s;}
 .vc-nav-btn:hover{color:var(--ink);border-bottom-color:var(--ink);}
 .vc-pos{font-size:10px;font-weight:300;color:var(--grey2);}
 .vc-dh{padding:20px 28px 16px;border-bottom:1px solid var(--rule);flex-shrink:0;}
@@ -294,7 +296,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 /* ══ NOTIFICATION BAR ══ */
 .notif-bar{display:none;align-items:center;justify-content:space-between;background:var(--ink);color:var(--white);padding:12px 24px;margin-bottom:24px;animation:fadeUp 0.25s ease both;}
 .notif-bar.show{display:flex;}
-.notif-text{font-size:11px;font-weight:300;letter-spacing:0.5px;display:flex;align-items:center;gap:12px;}
+.notif-text{font-size:11px;font-weight:300;letter-spacing:0.5px;display:flex;align-items:center;gap:12px;color:var(--white);}
 .notif-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.4s ease-in-out infinite;flex-shrink:0;}
 .notif-refresh{font-size:10px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;background:none;border:none;border-bottom:1px solid rgba(255,255,255,0.35);color:var(--white);padding:0 0 2px;cursor:pointer;transition:border-color 0.15s;}
 .notif-refresh:hover{border-bottom-color:var(--white);}
@@ -303,12 +305,12 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 
 /* ══ DE FINALIZAT ══ */
 .fin-section{margin-top:0;}
-.fin-hdr{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;}
+.fin-hdr{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
 .fin-title{font-size:22px;font-weight:600;color:var(--ink);line-height:1;letter-spacing:-0.5px;}
 .fin-badge{font-size:10px;font-weight:300;letter-spacing:1.5px;color:var(--white);background:var(--red);padding:3px 10px;display:inline-flex;align-items:center;}
 .fin-note{font-size:13px;font-weight:300;color:var(--grey);margin-bottom:24px;line-height:1.6;max-width:700px;}
 .fin-note strong{font-weight:500;color:var(--ink);}
-.fin-tbl-hdr{display:grid;grid-template-columns:36px 1.4fr 1fr 130px 130px;padding:8px 20px;border-bottom:1px solid var(--rule);}
+.fin-tbl-hdr{display:grid;grid-template-columns:36px 1.4fr 1fr 130px 130px;padding:8px 20px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--surface);}
 .fin-tbl-hdr span{font-size:9px;font-weight:300;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey2);}
 .fin-row{display:grid;grid-template-columns:36px 1.4fr 1fr 130px 130px;padding:14px 20px;border-bottom:1px solid var(--rule);align-items:center;transition:background 0.15s,opacity 0.4s;background:var(--white);}
 .fin-row:last-child{border-bottom:none;}
@@ -435,7 +437,10 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
 <hr class="rule-hr">
 
 <!-- ══ VOLUME EXPLORER ══ -->
-<div class="section-label">Dosare</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+  <div class="section-label" style="margin-bottom:0;">Dosare</div>
+  <button class="vol-toggle-btn" id="vol-toggle" onclick="toggleVolExplorer()" aria-expanded="false">+</button>
+</div>
 <div class="vol-tabs-row">
   <div class="vol-tabs">
     <button class="vol-tab active" onclick="setFilter('toate',this)">Toate</button>
@@ -446,34 +451,32 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
     <button class="vol-tab" onclick="setFilter('imputerniciri',this)">Împuterniciri</button>
   </div>
 </div>
-<div class="vol-desc">
-  <span class="vd-name" id="vd-name">Toate tipurile</span>
-  <span class="vd-body" id="vd-body">Volum total al biroului. Ajustați parametrii pentru a vedea proiecția.</span>
-</div>
-<div class="controls">
-  <div class="ctrl-group">
-    <div class="ctrl-header"><span class="ctrl-label">Dosare / lună</span><span class="ctrl-val" id="v-vol">20</span></div>
-    <input type="range" id="s-vol" min="5" max="60" step="1" value="20">
-    <div class="ctrl-hint">Volumul lunar țintă. Media națională: ~18 dosare/lună per birou urban.</div>
+<div id="vol-explorer" style="display:none;margin-top:20px;">
+  <div class="controls">
+    <div class="ctrl-group">
+      <div class="ctrl-header"><span class="ctrl-label">Dosare / lună</span><span class="ctrl-val" id="v-vol">20</span></div>
+      <input type="range" id="s-vol" min="5" max="60" step="1" value="20">
+      <div class="ctrl-hint">Volumul lunar țintă. Media națională: ~18 dosare/lună per birou urban.</div>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-header"><span class="ctrl-label">Zile până la programare</span><span class="ctrl-val" id="v-wait">4</span></div>
+      <input type="range" id="s-wait" min="1" max="14" step="1" value="4">
+      <div class="ctrl-hint">Timp mediu de așteptare din momentul înregistrării până la programare.</div>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-header"><span class="ctrl-label">Rată finalizare (%)</span><span class="ctrl-val" id="v-rate">85</span></div>
+      <input type="range" id="s-rate" min="50" max="100" step="1" value="85">
+      <div class="ctrl-hint">Procentul dosarelor programate care ajung la semnare.</div>
+    </div>
   </div>
-  <div class="ctrl-group">
-    <div class="ctrl-header"><span class="ctrl-label">Zile până la programare</span><span class="ctrl-val" id="v-wait">4</span></div>
-    <input type="range" id="s-wait" min="1" max="14" step="1" value="4">
-    <div class="ctrl-hint">Timp mediu de așteptare din momentul înregistrării până la programare.</div>
+  <div class="chart-legend">
+    <span class="leg"><span class="leg-bar" style="background:var(--ink)"></span>Dosare înregistrate</span>
+    <span class="leg"><span class="leg-bar" style="background:#cccccc"></span>Dosare finalizate</span>
+    <span class="leg"><span class="leg-line dashed"></span>Tendință & proiecție</span>
   </div>
-  <div class="ctrl-group">
-    <div class="ctrl-header"><span class="ctrl-label">Rată finalizare (%)</span><span class="ctrl-val" id="v-rate">85</span></div>
-    <input type="range" id="s-rate" min="50" max="100" step="1" value="85">
-    <div class="ctrl-hint">Procentul dosarelor programate care ajung la semnare.</div>
-  </div>
+  <div class="chart-wrap" style="margin-bottom:8px;"><canvas id="volChart"></canvas></div>
+  <p class="chart-note" id="vol-chart-note">—</p>
 </div>
-<div class="chart-legend">
-  <span class="leg"><span class="leg-bar" style="background:var(--ink)"></span>Dosare înregistrate</span>
-  <span class="leg"><span class="leg-bar" style="background:#cccccc"></span>Dosare finalizate</span>
-  <span class="leg"><span class="leg-line dashed"></span>Tendință & proiecție</span>
-</div>
-<div class="chart-wrap" style="margin-bottom:8px;"><canvas id="volChart"></canvas></div>
-<p class="chart-note" id="vol-chart-note">—</p>
 
 <hr class="rule-hr">
 
@@ -517,7 +520,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
       <div class="va-detail-view" id="va-view">
         <div class="va-dh">
           <div><div class="va-dh-ref" id="va-ref">—</div><div class="va-dh-name" id="va-name">—</div><div class="va-dh-tags" id="va-tags"></div></div>
-          <button class="close-btn" onclick="closeA()">✕</button>
+          <button class="close-btn" onclick="closeA()">−</button>
         </div>
         <div class="va-db">
           <div class="va-db-col">
@@ -558,7 +561,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
     <div class="vb-open" id="vb-open">
       <div class="vb-dh">
         <div><div class="vb-dh-ref" id="vb-ref">—</div><div class="vb-dh-name" id="vb-name">—</div><div class="vb-dh-tags" id="vb-tags"></div></div>
-        <button class="close-btn" onclick="closeB()">✕</button>
+        <button class="close-btn" onclick="closeB()">−</button>
       </div>
       <div class="vb-db">
         <div class="vb-db-col">
@@ -602,7 +605,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
       <span class="vc-pos" id="vc-pos">1 / 8</span>
       <button class="vc-nav-btn" onclick="navC(1)">următor →</button>
     </div>
-    <button class="close-btn" onclick="closeC()">✕</button>
+    <button class="close-btn" onclick="closeC()">−</button>
   </div>
   <div class="vc-dh">
     <div class="vc-dh-ref" id="vc-ref">—</div>
@@ -651,7 +654,7 @@ html,body{background:#fff;color:var(--ink);font-family:var(--sans);-webkit-font-
     <span class="ci-modal-title">Verificare act de identitate</span>
     <div class="ci-modal-actions">
       <button class="ci-download-btn" onclick="showToast('Descărcare CI…')">↓ Descarcă</button>
-      <button class="close-btn" onclick="closeCI()">✕</button>
+      <button class="close-btn" onclick="closeCI()">−</button>
     </div>
   </div>
   <div class="ci-modal-body">
@@ -949,8 +952,8 @@ function setFilter(type,btn){
   currentFilter=type;
   document.querySelectorAll('.vol-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('vd-name').textContent=ACT_INFO[type].name;
-  document.getElementById('vd-body').innerHTML=ACT_INFO[type].body;
+  const vdn=document.getElementById('vd-name');if(vdn)vdn.textContent=ACT_INFO[type].name;
+  const vdb=document.getElementById('vd-body');if(vdb)vdb.innerHTML=ACT_INFO[type].body;
   rebuildAllLists();closeA();closeB();closeC();
 }
 
@@ -1101,51 +1104,7 @@ function buildLineData(){
 }
 
 window.addEventListener('load',()=>{
-  const ctx=document.getElementById('volChart');
-  if(ctx){
-    volChart=new Chart(ctx,{
-      data:{
-        labels:MONTHS_H,
-        datasets:[
-          {type:'bar',label:'Înregistrate',data:[...ACT_V],backgroundColor:'#0d0d0d',barPercentage:0.7,categoryPercentage:0.65,order:2},
-          {type:'bar',label:'Finalizate',data:[...ACT_F],backgroundColor:'#cccccc',barPercentage:0.7,categoryPercentage:0.65,order:2},
-          {type:'line',label:'Tendință & proiecție',data:buildLineData(),borderColor:'#d42b2b',borderWidth:2,borderDash:[5,4],pointBackgroundColor:'#d42b2b',pointBorderColor:'#ffffff',pointBorderWidth:2,pointRadius:3.5,tension:0.3,fill:false,order:0}
-        ]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        interaction:{mode:'index',intersect:false},
-        plugins:{
-          legend:{display:false},
-          tooltip:{
-            backgroundColor:'#0d0d0d',
-            titleFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},
-            bodyFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},
-            padding:10,cornerRadius:2,
-            callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}
-          }
-        },
-        scales:{
-          x:{
-            stacked:false,
-            grid:{display:false},
-            ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555'},
-            border:{display:false}
-          },
-          y:{
-            stacked:false,
-            grid:{color:'#e8e8e8'},
-            ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555',stepSize:5},
-            border:{display:false}
-          }
-        }
-      }
-    });
-    updateChartNote();
-    document.getElementById('s-vol').addEventListener('input',function(){sv=+this.value;document.getElementById('v-vol').textContent=sv;soundSlider();updateChart();});
-    document.getElementById('s-wait').addEventListener('input',function(){sw=+this.value;document.getElementById('v-wait').textContent=sw;soundSlider();updateChart();});
-    document.getElementById('s-rate').addEventListener('input',function(){sr=+this.value;document.getElementById('v-rate').textContent=sr;soundSlider();updateChart();});
-  }
+  // chart inits lazily on first open of vol explorer
   switchView(currentView);
   rebuildAllLists();
   selA(1);
@@ -1155,6 +1114,44 @@ window.addEventListener('load',()=>{
     if(el)el.addEventListener('scroll',soundScroll,{passive:true});
   });
 });
+
+let volChartInited=false;
+function toggleVolExplorer(){
+  const btn=document.getElementById('vol-toggle');
+  const panel=document.getElementById('vol-explorer');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  btn.textContent=open?'−':'+';
+  btn.setAttribute('aria-expanded',open);
+  if(open&&!volChartInited){volChartInited=true;initVolChart();}
+}
+function initVolChart(){
+  const ctx=document.getElementById('volChart');
+  if(!ctx)return;
+  volChart=new Chart(ctx,{
+    data:{
+      labels:MONTHS_H,
+      datasets:[
+        {type:'bar',label:'Înregistrate',data:[...ACT_V],backgroundColor:'#0d0d0d',barPercentage:0.7,categoryPercentage:0.65,order:2},
+        {type:'bar',label:'Finalizate',data:[...ACT_F],backgroundColor:'#cccccc',barPercentage:0.7,categoryPercentage:0.65,order:2},
+        {type:'line',label:'Tendință & proiecție',data:buildLineData(),borderColor:'#d42b2b',borderWidth:2,borderDash:[5,4],pointBackgroundColor:'#d42b2b',pointBorderColor:'#ffffff',pointBorderWidth:2,pointRadius:3.5,tension:0.3,fill:false,order:0}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#0d0d0d',titleFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},bodyFont:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:11},padding:10,cornerRadius:2,callbacks:{label:ctx=>' '+ctx.dataset.label+': '+ctx.parsed.y}}},
+      scales:{
+        x:{stacked:false,grid:{display:false},ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555'},border:{display:false}},
+        y:{stacked:false,grid:{color:'#e8e8e8'},ticks:{font:{family:"'Helvetica Neue',Helvetica,Arial,sans-serif",size:10},color:'#555',stepSize:5},border:{display:false}}
+      }
+    }
+  });
+  updateChartNote();
+  document.getElementById('s-vol').addEventListener('input',function(){sv=+this.value;document.getElementById('v-vol').textContent=sv;soundSlider();updateChart();});
+  document.getElementById('s-wait').addEventListener('input',function(){sw=+this.value;document.getElementById('v-wait').textContent=sw;soundSlider();updateChart();});
+  document.getElementById('s-rate').addEventListener('input',function(){sr=+this.value;document.getElementById('v-rate').textContent=sr;soundSlider();updateChart();});
+}
 
 function updateChart(){
   if(!volChart)return;
